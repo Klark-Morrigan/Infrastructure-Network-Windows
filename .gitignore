@@ -1,3 +1,5 @@
+# Claude Code local settings (machine-specific permission overrides)
+.claude/settings.local.json
 
 # graphify knowledge graph artifacts (local; rebuilt by graphify)
 graphify-out/
