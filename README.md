@@ -9,12 +9,21 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 ## Contents
 
 - [Functions](#functions)
+  - [ICS](#ics)
   - [Firewall](#firewall)
 - [Repository layout](#repository-layout)
 - [Installation](#installation)
 - [Local tests](#local-tests)
 
 ## Functions
+
+### ICS
+
+| Function | What it does |
+|---|---|
+| `Reset-IcsSharing` | Programmatic equivalent of toggling the WiFi adapter's Sharing tab off + on, via `HNetCfg.HNetShare` COM. Use when ICS's DNS proxy enters its known broken state (answers UDP/53 queries with TCP RSTs) where a `Restart-Service SharedAccess` does not recover. |
+| `Test-IcsDnsReachable` | Pure pass-through over `Resolve-DnsName` so probes can be mocked. Returns `$true` if the upstream resolver answered cleanly, `$false` for any error (timeout, RST, NXDOMAIN). |
+| `Test-IcsDnsProxyReachable` | Layered probe + one-shot auto-repair: tests ICS DNS proxy reachability; on FAIL invokes `Reset-IcsSharing` once and re-probes. Returns a finding object `{Status; Label; Detail}` for callers to route into their own preflight surface. |
 
 ### Firewall
 
@@ -29,6 +38,10 @@ Infrastructure.Network.Windows/
   Infrastructure.Network.Windows.psd1
   Infrastructure.Network.Windows.psm1
   Public/
+    Ics/
+      Reset-IcsSharing.ps1
+      Test-IcsDnsReachable.ps1
+      Test-IcsDnsProxyReachable.ps1
     Firewall/
       Set-RouterSshPortProxyFirewall.ps1
 Tests/

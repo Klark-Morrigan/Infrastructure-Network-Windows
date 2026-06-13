@@ -8,6 +8,7 @@
     Resolve-DnsName) do not exist on other platforms.
 
     Subdomains:
+      - Ics/        - Internet Connection Sharing toggle + DNS probes
       - Firewall/   - Windows Firewall companion for portproxy
 
     Each function lives in its own file under Public\<subdomain>\ and
@@ -18,6 +19,9 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+. "$PSScriptRoot\Public\Ics\Reset-IcsSharing.ps1"
+. "$PSScriptRoot\Public\Ics\Test-IcsDnsReachable.ps1"
+. "$PSScriptRoot\Public\Ics\Test-IcsDnsProxyReachable.ps1"
 . "$PSScriptRoot\Public\Firewall\Set-RouterSshPortProxyFirewall.ps1"
 
 # Export-ModuleMember controls what is actually callable after Import-Module.
@@ -27,5 +31,8 @@ $ErrorActionPreference = 'Stop'
 # discovery without loading the module. The shared Module.Tests.ps1 in the
 # run-unit-tests action enforces that every Public\*.ps1 file appears in both.
 Export-ModuleMember -Function @(
+    'Reset-IcsSharing',
+    'Test-IcsDnsReachable',
+    'Test-IcsDnsProxyReachable',
     'Set-RouterSshPortProxyFirewall',
 )
