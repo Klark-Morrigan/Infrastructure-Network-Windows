@@ -11,6 +11,8 @@
     )
 
     FunctionsToExport = @(
+        # Windows Firewall companion for the portproxy.
+        'Set-RouterSshPortProxyFirewall',
     )
     CmdletsToExport   = @()
     AliasesToExport   = @()
