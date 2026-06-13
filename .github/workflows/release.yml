@@ -1,0 +1,52 @@
+name: Release
+
+# NetworkWindows module has no integration tests (the functions wrap wsl.exe; the
+# unit tests mock that boundary, so a docker host/target run would add
+# no signal). Release path is therefore the slimmer
+# check-version -> unit -> tag -> publish chain.
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      # Only fire when the manifest itself changes, not on every push.
+      - 'Infrastructure.Network.Windows/Infrastructure.Network.Windows.psd1'
+  workflow_dispatch:
+
+jobs:
+  check-version:
+    runs-on: windows-latest
+    outputs:
+      version_is_new: ${{ steps.check.outputs.version_is_new }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: check
+        uses: VitaliiAndreev/PowerShell-Common/.github/actions/check-version-is-new@master
+        with:
+          psd1: 'Infrastructure.Network.Windows\Infrastructure.Network.Windows.psd1'
+
+  test-unit:
+    needs: check-version
+    if: needs.check-version.outputs.version_is_new == 'true'
+    uses: VitaliiAndreev/PowerShell-Common/.github/workflows/ci-powershell.yml@master
+
+  tag:
+    needs: [ check-version, test-unit ]
+    if: needs.check-version.outputs.version_is_new == 'true'
+    permissions:
+      contents: write
+    uses: VitaliiAndreev/PowerShell-Common/.github/workflows/tag.yml@master
+    with:
+      psd1: 'Infrastructure.Network.Windows\Infrastructure.Network.Windows.psd1'
+
+  publish:
+    needs: tag
+    if: needs.tag.outputs.tag_created == 'true'
+    uses: VitaliiAndreev/PowerShell-Common/.github/workflows/publish.yml@master
+    with:
+      module-path: Infrastructure.Network.Windows
+    secrets:
+      PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
