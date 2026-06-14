@@ -42,9 +42,13 @@ Describe 'Set-RouterSshPortProxy' {
 
     BeforeEach { Initialize-NetshState }
 
-    Context 'idempotency' {
+    Context 'an existing rule for the listen target' {
 
-        It 'skips the add when a matching rule is already present' {
+        It 'refreshes it (delete + re-add) even when the connect target is identical' {
+            # The rule text persists across a router/switch teardown but
+            # its iphlpsvc forwarding goes stale; an unconditional re-add
+            # rebinds the relay. Skipping here (the previous behaviour) is
+            # what stranded WSL -> portproxy -> router across reprovisions.
             $global:_NetshOutput = New-NetshShowOutput @(
                 [PSCustomObject]@{
                     ListenAddress  = '0.0.0.0'
@@ -56,13 +60,12 @@ Describe 'Set-RouterSshPortProxy' {
 
             Set-RouterSshPortProxy -ConnectAddress '192.168.137.10'
 
-            # Only the show command should have fired - no add, no delete.
             # @(...) wraps the (possibly $null) Where-Object result so
             # .Count is StrictMode-safe.
-            @($script:_NetshCalls | Where-Object { $_.Args -contains 'add' }).Count    |
-                Should -Be 0
             @($script:_NetshCalls | Where-Object { $_.Args -contains 'delete' }).Count |
-                Should -Be 0
+                Should -Be 1
+            @($script:_NetshCalls | Where-Object { $_.Args -contains 'add' }).Count    |
+                Should -Be 1
         }
     }
 
