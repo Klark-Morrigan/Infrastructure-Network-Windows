@@ -18,6 +18,7 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 - [Installation](#installation)
 - [Local tests](#local-tests)
 - [CI and linting](#ci-and-linting)
+- [Release](#release)
 
 ## Functions
 
@@ -147,3 +148,17 @@ All three runners are thin shims over Common-Automation's engine, pointed at
 this repo via the `COMMON_AUTOMATION_TARGET_REPO` env var, so a sibling
 checkout at `..\Common-Automation` is required. `.gitattributes` pins `*.sh`
 to LF and `*.bat` to CRLF - Linux CI runners reject CRLF shebangs.
+
+## Release
+
+Releases are CHANGELOG.md-driven. To ship a version: promote the
+`[Unreleased]` section in [CHANGELOG.md](CHANGELOG.md) to the new version +
+date, bump `ModuleVersion` in
+`Infrastructure.Network.Windows/Infrastructure.Network.Windows.psd1` to
+match, and merge to `master`. The manifest change triggers
+[`release.yml`](.github/workflows/release.yml), which checks the version is
+new, asserts it matches the top CHANGELOG.md section (so notes can never lag
+the release), runs the Pester unit suite and the Docker host/target
+integration workflows (which scan, find no integration tests, and no-op for
+this module), then tags, publishes to PSGallery, and cuts a GitHub Release
+from CHANGELOG.md via Common-PowerShell's `release-tail.yml`.
