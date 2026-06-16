@@ -13,6 +13,18 @@ history and the tag list.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-06-16
+
+### Changed
+- `Set-RouterSshPortProxyFirewall` now also adds a Hyper-V Firewall
+  allow (`New-NetFirewallHyperVRule`) scoped to WSL's VM-creator id, not
+  just the Defender rule. On Windows 11 WSL "Hyper-V firewall" mode,
+  WSL-to-host traffic is filtered by the Hyper-V Firewall (default-Block)
+  and the Defender rule has no effect, so the portproxy was reachable
+  from the host but not WSL - failing the Ansible router pre-flight with
+  a TCP timeout. Both rules are idempotent and no-op when their
+  preconditions are absent.
+
 ## [0.4.1] - 2026-06-16
 
 ### Changed
@@ -41,6 +53,7 @@ history and the tag list.
   connection-profile / WSL-router reachability probes
   (`Test-HostNetworkProfileSetting`, `Test-WslRouterReachability`).
 
-[Unreleased]: https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/compare/0.4.1...HEAD
+[Unreleased]: https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/compare/0.3.0...0.4.0
