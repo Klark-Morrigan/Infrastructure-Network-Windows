@@ -1,7 +1,7 @@
 @{
-    ModuleVersion        = '0.6.0'
+    ModuleVersion        = '1.0.0'
     GUID                 = 'd8b3f5c2-1e47-4f9a-b6d3-7e5a9c2f1b08'
-    Author               = 'Vitaly Andrev'
+    Author               = 'Klark Morrigan'
     Description          = 'Windows host network utilities for infrastructure repos (ICS, netsh portproxy, firewall, network profile, DNS).'
     PowerShellVersion    = '7.0'
     CompatiblePSEditions = @('Core')
@@ -17,11 +17,11 @@
     RequiredModules = @(
         @{
             ModuleName    = 'Infrastructure.Wsl'
-            ModuleVersion = '0.1.0'
+            ModuleVersion = '1.0.0'
         }
         @{
             ModuleName    = 'Common.PowerShell'
-            ModuleVersion = '8.1.0'
+            ModuleVersion = '9.0.0'
             GUID          = 'b7d3f2a1-4c9e-4f8d-a2b5-3e6d7f8a9b0c'
         }
     )
@@ -59,9 +59,9 @@
     # the source repository.
     PrivateData = @{
         PSData = @{
-            ProjectUri   = 'https://github.com/VitaliiAndreev/Infrastructure-Network-Windows'
-            LicenseUri   = 'https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/blob/master/LICENSE'
-            ReleaseNotes = 'https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/releases'
+            ProjectUri   = 'https://github.com/Klark-Morrigan/Infrastructure-Network-Windows'
+            LicenseUri   = 'https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/blob/master/LICENSE'
+            ReleaseNotes = 'https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/releases'
         }
     }
 }

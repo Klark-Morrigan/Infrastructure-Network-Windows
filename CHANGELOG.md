@@ -13,6 +13,11 @@ history and the tag list.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-06-17
+
+### Changed
+- Major version bump; no functional changes (version realignment).
+
 ## [0.6.0] - 2026-06-16
 
 ### Changed
@@ -81,8 +86,9 @@ history and the tag list.
   connection-profile / WSL-router reachability probes
   (`Test-HostNetworkProfileSetting`, `Test-WslRouterReachability`).
 
-[Unreleased]: https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/compare/0.6.0...HEAD
-[0.6.0]: https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/compare/0.5.0...0.6.0
-[0.5.0]: https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/compare/0.4.1...0.5.0
-[0.4.1]: https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/compare/0.4.0...0.4.1
-[0.4.0]: https://github.com/VitaliiAndreev/Infrastructure-Network-Windows/compare/0.3.0...0.4.0
+[Unreleased]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/0.6.0...1.0.0
+[0.6.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/0.5.0...0.6.0
+[0.5.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/0.4.1...0.5.0
+[0.4.1]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/0.4.0...0.4.1
+[0.4.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/0.3.0...0.4.0

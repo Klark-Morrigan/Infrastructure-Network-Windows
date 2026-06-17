@@ -103,7 +103,7 @@ by `Install-Module` / auto-imported by `Import-Module`.
 Requires the shared CI scaffolding from `Common-PowerShell`:
 
 ```powershell
-git clone https://github.com/VitaliiAndreev/Common-PowerShell .ci-common
+git clone https://github.com/Klark-Morrigan/Common-PowerShell .ci-common
 .\scripts\Run-Tests.ps1
 ```
 
