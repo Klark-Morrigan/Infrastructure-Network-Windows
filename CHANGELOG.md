@@ -13,6 +13,27 @@ history and the tag list.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-06-18
+
+### Added
+- `Get-IcsDnsFailureDiagnostics` - on a dead ICS DNS proxy, probes the
+  two distinguishing host signals (`SharedAccess` service status + an
+  upstream-side resolve via the host's own resolver) and returns the one
+  fix that applies, instead of a checklist.
+- `Test-HostDnsReachable` - resolves `archive.ubuntu.com` via the host's
+  own configured resolver (no `-Server`), the upstream-side counterpart
+  to `Test-IcsDnsReachable`. Distinguishes a wedged ICS proxy (host DNS
+  works, proxy does not) from a dead host upstream (neither works), which
+  need different fixes.
+
+### Changed
+- `Test-IcsDnsProxyReachable`'s terminal FAIL (proxy still unreachable
+  after the one-shot `Reset-IcsSharing`) now folds
+  `Get-IcsDnsFailureDiagnostics` output into the finding `Detail`, naming
+  the next action (start service / fix host network / restart + reboot)
+  rather than pointing the operator at a manual checklist. Signature and
+  finding shape are unchanged, so callers need no update.
+
 ## [1.0.0] - 2026-06-17
 
 ### Changed
@@ -86,7 +107,8 @@ history and the tag list.
   connection-profile / WSL-router reachability probes
   (`Test-HostNetworkProfileSetting`, `Test-WslRouterReachability`).
 
-[Unreleased]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/1.0.0...HEAD
+[Unreleased]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/0.6.0...1.0.0
 [0.6.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/0.4.1...0.5.0
