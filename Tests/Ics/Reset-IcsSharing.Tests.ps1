@@ -48,10 +48,6 @@ BeforeAll {
         # The inline scriptblock above cannot close over $cap easily.
         # Replace via Add-Member -Force with a clean closure-based shape.
         $hnetcfg.psobject.Properties.Remove('INetSharingConfigurationForINetConnection')
-        $invokeBlock = {
-            param($n)
-            $cap[$n]
-        }.GetNewClosure()
         $wrapper = [PSCustomObject]@{ ConfigByName = $cap }
         $wrapper | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
             param($n)
