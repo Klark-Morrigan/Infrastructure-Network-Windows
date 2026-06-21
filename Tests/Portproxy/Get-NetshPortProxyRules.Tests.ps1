@@ -2,7 +2,7 @@ BeforeAll {
     # Stub netsh at file scope so per-test Mocks can shape the output
     # without invoking the real binary.
     function global:netsh {
-        $output = $global:_NetshOutput
+        $output = $script:_NetshOutput
         $global:LASTEXITCODE = 0
         return $output
     }
@@ -31,7 +31,7 @@ BeforeAll {
 Describe 'Get-NetshPortProxyRules' {
 
     It 'returns an empty array when no rules are configured' {
-        $global:_NetshOutput = New-NetshShowOutput @()
+        $script:_NetshOutput = New-NetshShowOutput @()
 
         $result = @(Get-NetshPortProxyRules)
 
@@ -39,7 +39,7 @@ Describe 'Get-NetshPortProxyRules' {
     }
 
     It 'returns an empty array when netsh produces no output at all' {
-        $global:_NetshOutput = $null
+        $script:_NetshOutput = $null
 
         $result = @(Get-NetshPortProxyRules)
 
@@ -47,7 +47,7 @@ Describe 'Get-NetshPortProxyRules' {
     }
 
     It 'parses a single rule into the expected shape' {
-        $global:_NetshOutput = New-NetshShowOutput @(
+        $script:_NetshOutput = New-NetshShowOutput @(
             [PSCustomObject]@{
                 ListenAddress  = '127.0.0.1'
                 ListenPort     = 2222
@@ -66,7 +66,7 @@ Describe 'Get-NetshPortProxyRules' {
     }
 
     It 'parses multiple rules' {
-        $global:_NetshOutput = New-NetshShowOutput @(
+        $script:_NetshOutput = New-NetshShowOutput @(
             [PSCustomObject]@{
                 ListenAddress  = '127.0.0.1'
                 ListenPort     = 2222
@@ -92,7 +92,7 @@ Describe 'Get-NetshPortProxyRules' {
         # as string the comparison silently fails under PowerShell's
         # type coercion rules. Explicit type assertion guards against
         # a regression that would re-introduce the silent miss.
-        $global:_NetshOutput = New-NetshShowOutput @(
+        $script:_NetshOutput = New-NetshShowOutput @(
             [PSCustomObject]@{
                 ListenAddress  = '127.0.0.1'
                 ListenPort     = 2222
@@ -111,7 +111,7 @@ Describe 'Get-NetshPortProxyRules' {
         # The regex anchors on "<ipv4> <port> <ipv4> <port>" so
         # cosmetic header changes (e.g. a locale-translated label,
         # an extra blank line) do not produce a phantom rule.
-        $global:_NetshOutput = @(
+        $script:_NetshOutput = @(
             'Some translated header text here',
             '',
             'Another line',

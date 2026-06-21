@@ -6,8 +6,8 @@ BeforeAll {
     # boundaries when the body does not invoke a native process.
     function global:netsh {
         $script:_NetshCalls += @{ Args = $args }
-        $output = $global:_NetshOutput
-        $global:LASTEXITCODE = $global:_NetshExitCode
+        $output = $script:_NetshOutput
+        $global:LASTEXITCODE = $script:_NetshExitCode
         return $output
     }
 
@@ -36,8 +36,8 @@ BeforeAll {
     function Initialize-NetshState {
         $script:_NetshCalls    = @()
         $script:_RetryCalls    = @()
-        $global:_NetshOutput   = @()
-        $global:_NetshExitCode = 0
+        $script:_NetshOutput   = @()
+        $script:_NetshExitCode = 0
     }
 
     function New-NetshShowOutput {
@@ -69,7 +69,7 @@ Describe 'Set-RouterSshPortProxy' {
             # its iphlpsvc forwarding goes stale; an unconditional re-add
             # rebinds the relay. Skipping here (the previous behaviour) is
             # what stranded WSL -> portproxy -> router across reprovisions.
-            $global:_NetshOutput = New-NetshShowOutput @(
+            $script:_NetshOutput = New-NetshShowOutput @(
                 [PSCustomObject]@{
                     ListenAddress  = '0.0.0.0'
                     ListenPort     = 2222
@@ -92,7 +92,7 @@ Describe 'Set-RouterSshPortProxy' {
     Context 'when listen target points at a different connect target' {
 
         It 'deletes the stale rule and adds the new one' {
-            $global:_NetshOutput = New-NetshShowOutput @(
+            $script:_NetshOutput = New-NetshShowOutput @(
                 [PSCustomObject]@{
                     ListenAddress  = '0.0.0.0'
                     ListenPort     = 2222
@@ -113,7 +113,7 @@ Describe 'Set-RouterSshPortProxy' {
     Context 'when no rule exists for the listen target' {
 
         It 'adds a fresh rule' {
-            $global:_NetshOutput = New-NetshShowOutput @()
+            $script:_NetshOutput = New-NetshShowOutput @()
 
             Set-RouterSshPortProxy -ConnectAddress '192.168.137.10'
 
@@ -122,7 +122,7 @@ Describe 'Set-RouterSshPortProxy' {
         }
 
         It 'passes the operator-supplied listen + connect addresses through verbatim' {
-            $global:_NetshOutput = New-NetshShowOutput @()
+            $script:_NetshOutput = New-NetshShowOutput @()
 
             Set-RouterSshPortProxy `
                 -ListenAddress  '127.0.0.1' `
@@ -143,7 +143,7 @@ Describe 'Set-RouterSshPortProxy' {
             # the netsh add is handed to the retry primitive (which owns
             # the attempt/backoff/exhaustion behaviour) rather than run
             # bare. Mechanics themselves are covered by Common.PowerShell.
-            $global:_NetshOutput = New-NetshShowOutput @()
+            $script:_NetshOutput = New-NetshShowOutput @()
 
             Set-RouterSshPortProxy -ConnectAddress '192.168.137.10'
 
