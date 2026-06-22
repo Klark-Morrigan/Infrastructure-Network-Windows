@@ -43,6 +43,7 @@
         # netsh portproxy - localhost:port -> remote:port forwarding,
         # used to make Hyper-V Internal-switch IPs reachable from WSL.
         'Get-NetshPortProxyRules',
+        'Remove-RouterSshPortProxy',
         'Set-RouterSshPortProxy',
         # Windows Firewall companion for the portproxy (add + remove).
         'Remove-RouterSshPortProxyFirewall',

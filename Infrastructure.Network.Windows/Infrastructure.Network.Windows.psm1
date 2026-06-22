@@ -29,6 +29,7 @@ $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\Public\Ics\Test-IcsDnsProxyReachable.ps1"
 . "$PSScriptRoot\Public\Ics\Test-IcsDnsReachable.ps1"
 . "$PSScriptRoot\Public\Portproxy\Get-NetshPortProxyRules.ps1"
+. "$PSScriptRoot\Public\Portproxy\Remove-RouterSshPortProxy.ps1"
 . "$PSScriptRoot\Public\Portproxy\Set-RouterSshPortProxy.ps1"
 . "$PSScriptRoot\Public\Firewall\Remove-RouterSshPortProxyFirewall.ps1"
 . "$PSScriptRoot\Public\Firewall\Set-RouterSshPortProxyFirewall.ps1"
@@ -44,6 +45,7 @@ $ErrorActionPreference = 'Stop'
 Export-ModuleMember -Function @(
     'Get-IcsDnsFailureDiagnostics',
     'Get-NetshPortProxyRules',
+    'Remove-RouterSshPortProxy',
     'Remove-RouterSshPortProxyFirewall',
     'Reset-IcsSharing',
     'Set-RouterSshPortProxy',
