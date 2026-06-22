@@ -13,6 +13,21 @@ history and the tag list.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-22
+
+### Added
+- `Remove-RouterSshPortProxy` - teardown counterpart to
+  `Set-RouterSshPortProxy`. Removes every netsh portproxy rule forwarding
+  to a given router IP (keyed on the connect target, so it sweeps relays
+  under any listen address). netsh portproxy state persists across VM /
+  switch teardown, so without this the rules accumulate per router IP
+  across lifecycles and a stale entry can shadow the WSL relay
+  auto-discovery for the next router.
+- `Remove-RouterSshPortProxyFirewall` - teardown counterpart to
+  `Set-RouterSshPortProxyFirewall`; removes the inbound allow rule by its
+  port-keyed DisplayName so the firewall surface is torn down symmetrically
+  with the portproxy.
+
 ## [1.1.0] - 2026-06-18
 
 ### Added
