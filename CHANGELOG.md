@@ -13,6 +13,23 @@ history and the tag list.
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-25
+
+### Added
+- `Get-WirelessNetAdapter` - single source of truth for "which physical
+  adapters are Wi-Fi" on a Windows host (matches on the driver
+  `InterfaceDescription`, not the host-varying connection name). Returns
+  the matching `Get-NetAdapter` objects so callers can compare MACs,
+  resolve a connection name to feed `Reset-IcsSharing`'s WAN parameter,
+  or check link state without each carrying its own copy of the match.
+- `Set-RouterSshRelay` / `Remove-RouterSshRelay` - compose the netsh
+  portproxy and its Windows Firewall companion as one inseparable pair
+  (add and teardown), so a caller cannot lay/sweep one half and forget
+  the other - the silent "banner exchange timeout" footgun. `Set` adds a
+  `-FirewallOnly` mode for the pre-VM phase (firewall pre-laid before the
+  router IP is known); both delegate to the existing
+  `Set-/Remove-RouterSshPortProxy(+Firewall)` primitives.
+
 ## [1.2.0] - 2026-06-22
 
 ### Added
@@ -122,7 +139,9 @@ history and the tag list.
   connection-profile / WSL-router reachability probes
   (`Test-HostNetworkProfileSetting`, `Test-WslRouterReachability`).
 
-[Unreleased]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/1.1.0...HEAD
+[Unreleased]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/1.3.0...HEAD
+[1.3.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/1.2.0...1.3.0
+[1.2.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/0.6.0...1.0.0
 [0.6.0]: https://github.com/Klark-Morrigan/Infrastructure-Network-Windows/compare/0.5.0...0.6.0
