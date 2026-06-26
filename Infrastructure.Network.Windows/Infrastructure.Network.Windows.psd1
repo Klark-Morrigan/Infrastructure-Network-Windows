@@ -33,6 +33,8 @@
     # Both lists must stay in sync. The shared Module.Tests.ps1 in the
     # run-unit-tests action enforces this.
     FunctionsToExport = @(
+        # Adapter - physical NIC identification primitives.
+        'Get-WirelessNetAdapter',
         # ICS (Internet Connection Sharing) - host-side toggling +
         # DNS-via-ICS probes.
         'Get-IcsDnsFailureDiagnostics',

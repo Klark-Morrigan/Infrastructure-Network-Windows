@@ -8,6 +8,7 @@
     Resolve-DnsName) do not exist on other platforms.
 
     Subdomains:
+      - Adapter/    - Physical NIC identification (wireless detection)
       - Ics/        - Internet Connection Sharing toggle + DNS probes
       - Portproxy/  - netsh portproxy parser + idempotent add/replace
       - Firewall/   - Windows Firewall companion for portproxy
@@ -23,6 +24,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+. "$PSScriptRoot\Public\Adapter\Get-WirelessNetAdapter.ps1"
 . "$PSScriptRoot\Public\Ics\Get-IcsDnsFailureDiagnostics.ps1"
 . "$PSScriptRoot\Public\Ics\Reset-IcsSharing.ps1"
 . "$PSScriptRoot\Public\Ics\Test-HostDnsReachable.ps1"
@@ -45,6 +47,7 @@ $ErrorActionPreference = 'Stop'
 Export-ModuleMember -Function @(
     'Get-IcsDnsFailureDiagnostics',
     'Get-NetshPortProxyRules',
+    'Get-WirelessNetAdapter',
     'Remove-RouterSshPortProxy',
     'Remove-RouterSshPortProxyFirewall',
     'Reset-IcsSharing',

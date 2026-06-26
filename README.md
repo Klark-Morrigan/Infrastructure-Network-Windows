@@ -9,6 +9,7 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 ## Contents
 
 - [Functions](#functions)
+  - [Adapter](#adapter)
   - [ICS](#ics)
   - [Portproxy](#portproxy)
   - [Firewall](#firewall)
@@ -21,6 +22,12 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 - [Release](#release)
 
 ## Functions
+
+### Adapter
+
+| Function | What it does |
+|---|---|
+| `Get-WirelessNetAdapter` | Single source of truth for "which physical adapters are Wi-Fi". Matches `Get-NetAdapter -Physical` on the driver `InterfaceDescription` (`Wi-Fi` / `Wireless`), not the host-varying connection name. Returns the matching adapter objects so callers can compare MACs, resolve a connection name to feed `Reset-IcsSharing`'s WAN parameter, or check link state. Empty result (not an error) when no wireless NIC is present. |
 
 ### ICS
 
@@ -64,6 +71,8 @@ Infrastructure.Network.Windows/
   Infrastructure.Network.Windows.psd1
   Infrastructure.Network.Windows.psm1
   Public/
+    Adapter/
+      Get-WirelessNetAdapter.ps1
     Ics/
       Reset-IcsSharing.ps1
       Test-IcsDnsReachable.ps1
