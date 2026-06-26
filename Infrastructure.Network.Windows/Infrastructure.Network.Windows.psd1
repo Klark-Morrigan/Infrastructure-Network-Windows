@@ -1,5 +1,5 @@
 @{
-    ModuleVersion        = '1.2.0'
+    ModuleVersion        = '1.3.0'
     GUID                 = 'd8b3f5c2-1e47-4f9a-b6d3-7e5a9c2f1b08'
     Author               = 'Klark Morrigan'
     Description          = 'Windows host network utilities for infrastructure repos (ICS, netsh portproxy, firewall, network profile, DNS).'
@@ -33,6 +33,8 @@
     # Both lists must stay in sync. The shared Module.Tests.ps1 in the
     # run-unit-tests action enforces this.
     FunctionsToExport = @(
+        # Adapter - physical NIC identification primitives.
+        'Get-WirelessNetAdapter',
         # ICS (Internet Connection Sharing) - host-side toggling +
         # DNS-via-ICS probes.
         'Get-IcsDnsFailureDiagnostics',
@@ -48,6 +50,9 @@
         # Windows Firewall companion for the portproxy (add + remove).
         'Remove-RouterSshPortProxyFirewall',
         'Set-RouterSshPortProxyFirewall',
+        # Relay - portproxy + firewall composed as one inseparable pair.
+        'Remove-RouterSshRelay',
+        'Set-RouterSshRelay',
         # Network profile (Public / Private / Domain) on a host
         # interface. The preflight wraps this for vEthernet adapters.
         'Test-HostNetworkProfileSetting',

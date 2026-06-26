@@ -8,9 +8,11 @@
     Resolve-DnsName) do not exist on other platforms.
 
     Subdomains:
+      - Adapter/    - Physical NIC identification (wireless detection)
       - Ics/        - Internet Connection Sharing toggle + DNS probes
       - Portproxy/  - netsh portproxy parser + idempotent add/replace
       - Firewall/   - Windows Firewall companion for portproxy
+      - Relay/      - portproxy + firewall composed as one pair
       - Profile/    - Network profile (Public/Private/Domain) on a NIC
       - Probes/     - WSL-side network reachability probes
                       (depends on Infrastructure.Wsl for Invoke-WslShell)
@@ -23,6 +25,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+. "$PSScriptRoot\Public\Adapter\Get-WirelessNetAdapter.ps1"
 . "$PSScriptRoot\Public\Ics\Get-IcsDnsFailureDiagnostics.ps1"
 . "$PSScriptRoot\Public\Ics\Reset-IcsSharing.ps1"
 . "$PSScriptRoot\Public\Ics\Test-HostDnsReachable.ps1"
@@ -33,6 +36,8 @@ $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\Public\Portproxy\Set-RouterSshPortProxy.ps1"
 . "$PSScriptRoot\Public\Firewall\Remove-RouterSshPortProxyFirewall.ps1"
 . "$PSScriptRoot\Public\Firewall\Set-RouterSshPortProxyFirewall.ps1"
+. "$PSScriptRoot\Public\Relay\Remove-RouterSshRelay.ps1"
+. "$PSScriptRoot\Public\Relay\Set-RouterSshRelay.ps1"
 . "$PSScriptRoot\Public\Profile\Test-HostNetworkProfileSetting.ps1"
 . "$PSScriptRoot\Public\Probes\Test-WslRouterReachability.ps1"
 
@@ -45,11 +50,14 @@ $ErrorActionPreference = 'Stop'
 Export-ModuleMember -Function @(
     'Get-IcsDnsFailureDiagnostics',
     'Get-NetshPortProxyRules',
+    'Get-WirelessNetAdapter',
     'Remove-RouterSshPortProxy',
     'Remove-RouterSshPortProxyFirewall',
+    'Remove-RouterSshRelay',
     'Reset-IcsSharing',
     'Set-RouterSshPortProxy',
     'Set-RouterSshPortProxyFirewall',
+    'Set-RouterSshRelay',
     'Test-HostDnsReachable',
     'Test-HostNetworkProfileSetting',
     'Test-IcsDnsProxyReachable',

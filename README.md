@@ -9,9 +9,11 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 ## Contents
 
 - [Functions](#functions)
+  - [Adapter](#adapter)
   - [ICS](#ics)
   - [Portproxy](#portproxy)
   - [Firewall](#firewall)
+  - [Relay](#relay)
   - [Profile](#profile)
   - [Probes](#probes)
 - [Repository layout](#repository-layout)
@@ -21,6 +23,12 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 - [Release](#release)
 
 ## Functions
+
+### Adapter
+
+| Function | What it does |
+|---|---|
+| `Get-WirelessNetAdapter` | Single source of truth for "which physical adapters are Wi-Fi". Matches `Get-NetAdapter -Physical` on the driver `InterfaceDescription` (`Wi-Fi` / `Wireless`), not the host-varying connection name. Returns the matching adapter objects so callers can compare MACs, resolve a connection name to feed `Reset-IcsSharing`'s WAN parameter, or check link state. Empty result (not an error) when no wireless NIC is present. |
 
 ### ICS
 
@@ -45,6 +53,13 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 |---|---|
 | `Set-RouterSshPortProxyFirewall` | Windows Defender Firewall companion for `Set-RouterSshPortProxy`. Inbound TCP allow scoped by source range to the WSL NAT range (`172.16.0.0/12`, override via `-WslNatRange`), so the host's physical LAN and the router's Internal-switch subnet stay default-deny. Range scope (not `-InterfaceAlias`) is deliberate: it has no interface GUID to go stale, so it survives `wsl --shutdown` / host reboots with no re-provision. Refreshed (delete + re-add) each run, which also migrates any older interface-pinned rule. No-op when WSL is not installed. |
 
+### Relay
+
+| Function | What it does |
+|---|---|
+| `Remove-RouterSshRelay` | Teardown counterpart: removes both the portproxy (keyed on the router connect IP) and its firewall companion (keyed on the listen port) symmetrically. Both inner removers are idempotent and best-effort. |
+| `Set-RouterSshRelay` | Composes `Set-RouterSshPortProxy` + `Set-RouterSshPortProxyFirewall` as one inseparable pair, so a caller cannot lay the portproxy and forget the firewall (the silent "banner exchange timeout" footgun). `-FirewallOnly` lays just the firewall half for the pre-VM phase, where the inbound allow is pre-laid before the router IP is known. |
+
 ### Profile
 
 | Function | What it does |
@@ -64,6 +79,8 @@ Infrastructure.Network.Windows/
   Infrastructure.Network.Windows.psd1
   Infrastructure.Network.Windows.psm1
   Public/
+    Adapter/
+      Get-WirelessNetAdapter.ps1
     Ics/
       Reset-IcsSharing.ps1
       Test-IcsDnsReachable.ps1
@@ -75,12 +92,15 @@ Infrastructure.Network.Windows/
       Set-RouterSshPortProxy.ps1
     Firewall/
       Set-RouterSshPortProxyFirewall.ps1
+    Relay/
+      Remove-RouterSshRelay.ps1
+      Set-RouterSshRelay.ps1
     Profile/
       Test-HostNetworkProfileSetting.ps1
     Probes/
       Test-WslRouterReachability.ps1
 Tests/
-  Ics/, Portproxy/, Firewall/, Profile/, Probes/   # mirror of Public/
+  Adapter/, Ics/, Portproxy/, Firewall/, Relay/, Profile/, Probes/   # mirror of Public/
 .github/workflows/
   ci-yaml.yml                 # Delegates to Common-Automation reusable ci-yaml.yml
   ci-bash.yml                 # Delegates to Common-Automation reusable ci-bash.yml
