@@ -12,6 +12,7 @@
       - Ics/        - Internet Connection Sharing toggle + DNS probes
       - Portproxy/  - netsh portproxy parser + idempotent add/replace
       - Firewall/   - Windows Firewall companion for portproxy
+      - Relay/      - portproxy + firewall composed as one pair
       - Profile/    - Network profile (Public/Private/Domain) on a NIC
       - Probes/     - WSL-side network reachability probes
                       (depends on Infrastructure.Wsl for Invoke-WslShell)
@@ -35,6 +36,7 @@ $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\Public\Portproxy\Set-RouterSshPortProxy.ps1"
 . "$PSScriptRoot\Public\Firewall\Remove-RouterSshPortProxyFirewall.ps1"
 . "$PSScriptRoot\Public\Firewall\Set-RouterSshPortProxyFirewall.ps1"
+. "$PSScriptRoot\Public\Relay\Set-RouterSshRelay.ps1"
 . "$PSScriptRoot\Public\Profile\Test-HostNetworkProfileSetting.ps1"
 . "$PSScriptRoot\Public\Probes\Test-WslRouterReachability.ps1"
 
@@ -53,6 +55,7 @@ Export-ModuleMember -Function @(
     'Reset-IcsSharing',
     'Set-RouterSshPortProxy',
     'Set-RouterSshPortProxyFirewall',
+    'Set-RouterSshRelay',
     'Test-HostDnsReachable',
     'Test-HostNetworkProfileSetting',
     'Test-IcsDnsProxyReachable',
