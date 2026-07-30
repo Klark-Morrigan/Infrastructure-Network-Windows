@@ -59,6 +59,7 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 |---|---|
 | `Remove-RouterSshRelay` | Teardown counterpart: removes both the portproxy (keyed on the router connect IP) and its firewall companion (keyed on the listen port) symmetrically. Both inner removers are idempotent and best-effort. |
 | `Set-RouterSshRelay` | Composes `Set-RouterSshPortProxy` + `Set-RouterSshPortProxyFirewall` as one inseparable pair, so a caller cannot lay the portproxy and forget the firewall (the silent "banner exchange timeout" footgun). `-FirewallOnly` lays just the firewall half for the pre-VM phase, where the inbound allow is pre-laid before the router IP is known. |
+| `Test-RouterSshRelay` | Actively probes the relay and returns `{Ok, Stage, Banner, Reason}`. An active probe rather than a `netsh` read because the failure it catches is invisible to configuration inspection: an ICS toggle regenerates the Internal vSwitch and strands iphlpsvc on the old network generation, so the portproxy entry still reads back perfectly while its onward hop is dead. `Stage` separates *nothing listening* (`Connect`) from *listening but not forwarding* (`Banner`). Probes the listener, not the router's IP - connecting straight to the router bypasses the relay and would report healthy while every WSL-side consumer is broken. |
 
 ### Profile
 
@@ -95,6 +96,7 @@ Infrastructure.Network.Windows/
     Relay/
       Remove-RouterSshRelay.ps1
       Set-RouterSshRelay.ps1
+      Test-RouterSshRelay.ps1
     Profile/
       Test-HostNetworkProfileSetting.ps1
     Probes/
