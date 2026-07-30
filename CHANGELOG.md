@@ -13,6 +13,36 @@ history and the tag list.
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-07-29
+
+### Added
+- `Test-RouterSshRelay` - the read counterpart `Set-RouterSshRelay` /
+  `Remove-RouterSshRelay` shipped without: until now the relay could be
+  laid and torn down but never verified, so a broken one was only ever
+  fixed blind by re-laying it under the preflight's `-AutoRepair` and no
+  caller could report that it had been broken. Actively probes the
+  host-side listen endpoint and returns a result object
+  (`Ok` / `Stage` / `Banner` / `Reason`).
+
+  It is an active probe, not a `netsh` read, because the failure it
+  exists to catch is invisible to configuration inspection: an ICS toggle
+  regenerates the Internal vSwitch network and leaves iphlpsvc forwarding
+  bound to the previous generation, so the portproxy entry reads back
+  perfectly while its onward hop is dead. Only moving bytes can see that.
+
+  `Stage` separates the two diagnoses - `Connect` (nothing listening; the
+  portproxy is absent) from `Banner` (listening but not forwarding; the
+  stale-generation signature, indistinguishable from a powered-off
+  router, which the `Reason` text says rather than guessing).
+
+  Probes the listener rather than the router's own IP on purpose:
+  connecting straight to `<router>:22` bypasses the relay and would
+  report healthy while every WSL-side consumer is broken. Host-side
+  loopback does not traverse the Windows Firewall, so the probe covers
+  the portproxy and its forwarding but not the firewall companion - a
+  narrow gap by design, since that rule is scoped by remote address
+  rather than interface and so has nothing volatile to go stale against.
+
 ## [1.3.0] - 2026-06-25
 
 ### Added
