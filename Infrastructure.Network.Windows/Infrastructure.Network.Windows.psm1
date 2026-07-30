@@ -38,6 +38,7 @@ $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\Public\Firewall\Set-RouterSshPortProxyFirewall.ps1"
 . "$PSScriptRoot\Public\Relay\Remove-RouterSshRelay.ps1"
 . "$PSScriptRoot\Public\Relay\Set-RouterSshRelay.ps1"
+. "$PSScriptRoot\Public\Relay\Test-RouterSshRelay.ps1"
 . "$PSScriptRoot\Public\Profile\Test-HostNetworkProfileSetting.ps1"
 . "$PSScriptRoot\Public\Probes\Test-WslRouterReachability.ps1"
 
@@ -62,5 +63,6 @@ Export-ModuleMember -Function @(
     'Test-HostNetworkProfileSetting',
     'Test-IcsDnsProxyReachable',
     'Test-IcsDnsReachable',
+    'Test-RouterSshRelay',
     'Test-WslRouterReachability'
 )
