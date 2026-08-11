@@ -59,7 +59,26 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 |---|---|
 | `Remove-RouterSshRelay` | Teardown counterpart: removes both the portproxy (keyed on the router connect IP) and its firewall companion (keyed on the listen port) symmetrically. Both inner removers are idempotent and best-effort. |
 | `Set-RouterSshRelay` | Composes `Set-RouterSshPortProxy` + `Set-RouterSshPortProxyFirewall` as one inseparable pair, so a caller cannot lay the portproxy and forget the firewall (the silent "banner exchange timeout" footgun). `-FirewallOnly` lays just the firewall half for the pre-VM phase, where the inbound allow is pre-laid before the router IP is known. |
-| `Test-RouterSshRelay` | Actively probes the relay and returns `{Ok, Stage, Banner, Reason}`. An active probe rather than a `netsh` read because the failure it catches is invisible to configuration inspection: an ICS toggle regenerates the Internal vSwitch and strands iphlpsvc on the old network generation, so the portproxy entry still reads back perfectly while its onward hop is dead. `Stage` separates *nothing listening* (`Connect`) from *listening but not forwarding* (`Banner`). Probes the listener, not the router's IP - connecting straight to the router bypasses the relay and would report healthy while every WSL-side consumer is broken. |
+| `Test-RouterSshRelay` | Actively probes the relay and returns `{Ok, Stage, Banner, Reason}`. An active probe rather than a `netsh` read because the failure it catches is invisible to configuration inspection: an ICS toggle regenerates the Internal vSwitch and strands iphlpsvc on the old network generation, so the portproxy entry still reads back perfectly while its onward hop is dead. `Stage` separates *nothing listening* (`Connect`) from *listening but not forwarding* (`Banner`). Probes the listener, not the router's IP - connecting straight to the router bypasses the relay and would report healthy while every WSL-side consumer is broken. **Prefer the bash sibling where it applies** - see the note below. |
+
+> **`Test-RouterSshRelay` is the host-side half of a pair.** Common-Ansible
+> ships [`ops/virtual-machines/_assert-router-reachable.sh`](https://github.com/Klark-Morrigan/Common-Ansible/blob/master/ops/virtual-machines/_assert-router-reachable.sh),
+> which probes the same hop with the same `nc` + `ssh` the Ansible
+> ProxyCommand uses. Running WSL-side, it *also* traverses the Windows
+> Firewall that a host-side loopback probe cannot — so it is the stronger
+> check, and it already gates every Ansible flow through
+> `_run-playbook.sh` → `resolve_router`. Code already executing in bash
+> under WSL should use that one.
+>
+> This cmdlet serves the host-side callers that run no playbook and
+> therefore cannot reach it: an operator at a PowerShell prompt, a
+> fleet-readiness script, a staging pre-check. The two sit on opposite
+> sides of the WSL boundary, so neither is worth expressing in terms of
+> the other.
+>
+> The reference is documentation only. This module does not consume
+> Common-Ansible and should not start — nothing here imports or shells out
+> to it.
 
 ### Profile
 

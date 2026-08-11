@@ -43,6 +43,13 @@ history and the tag list.
   narrow gap by design, since that rule is scoped by remote address
   rather than interface and so has nothing volatile to go stale against.
 
+  Not a replacement for Common-Ansible's
+  `ops/virtual-machines/_assert-router-reachable.sh`, which probes the
+  same hop WSL-side (traversing the firewall too) and already gates every
+  Ansible flow. Prefer that one from bash; this is for the host-side
+  callers that run no playbook. Documentation reference only - this module
+  does not consume Common-Ansible.
+
 ## [1.3.0] - 2026-06-25
 
 ### Added

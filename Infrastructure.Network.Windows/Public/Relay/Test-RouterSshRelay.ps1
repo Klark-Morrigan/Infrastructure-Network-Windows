@@ -46,6 +46,24 @@
 #   contract in this module (Assert-* throws; Test-* reports). Callers that
 #   want a gate assert on .Ok and surface .Reason, which is written to be
 #   shown to an operator verbatim.
+#
+#   PREFER THE BASH SIBLING WHERE IT APPLIES. Common-Ansible ships
+#   ops/virtual-machines/_assert-router-reachable.sh, which probes this same
+#   hop with the same nc + ssh the Ansible ProxyCommand uses. Because it runs
+#   WSL-side rather than host-side it ALSO traverses the Windows Firewall,
+#   which this loopback probe cannot (see SCOPE above) - so it is the stronger
+#   check, and it already gates every Ansible flow via
+#   _run-playbook.sh -> resolve_router. A caller already executing in bash
+#   under WSL should use that and not this.
+#
+#   What this exists for is the host-side callers that run no playbook and so
+#   cannot reach it: an operator at a PowerShell prompt, a fleet-readiness
+#   script, a staging pre-check. Reimplementing either in terms of the other
+#   is not worth it - they sit on opposite sides of the WSL boundary.
+#
+#   That reference is documentation, NOT a dependency: this module does not
+#   consume Common-Ansible and must not start. It is here so a reader
+#   choosing between the two knows the bash one is preferable when reachable.
 # ---------------------------------------------------------------------------
 
 function Test-RouterSshRelay {
