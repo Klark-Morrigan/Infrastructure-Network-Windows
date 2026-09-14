@@ -57,9 +57,14 @@ function Get-IcsDnsFailureDiagnostics {
     # it in a multi-finding error, where later lines start at column 0.
     $commandIndent = '        '
 
+    # Must stay the name Test-IcsDnsReachable / Test-HostDnsReachable resolve -
+    # those own the probe; printing a different host would hand the operator a
+    # command that proves something other than what the check measured.
+    $probeName = 'archive.ubuntu.com'
+
     # The verify step for every verdict: the same probe the check itself runs,
     # so "did the fix take" is answered without re-running the whole preflight.
-    $probeCommand = "Resolve-DnsName archive.ubuntu.com -Server $DnsProbeTarget -DnsOnly"
+    $probeCommand = "Resolve-DnsName $probeName -Server $DnsProbeTarget -DnsOnly"
 
     $resetCommand =
         if ($WanAdapterName -and $LanAdapterName) {
@@ -87,13 +92,13 @@ function Get-IcsDnsFailureDiagnostics {
         )
     }
     elseif (-not $hostDnsOk) {
-        $verdict = "Host's own upstream DNS cannot resolve archive.ubuntu.com either - " +
+        $verdict = "Host's own upstream DNS cannot resolve $probeName either - " +
                    "the fault is the host network (WiFi DNS / no internet), not ICS. " +
                    "Toggling sharing will not help; restore host connectivity first:"
         $commands = @(
             'Get-NetConnectionProfile                          # is the WAN link up',
             'Get-DnsClientServerAddress -AddressFamily IPv4    # what the host asks',
-            'Resolve-DnsName archive.ubuntu.com -DnsOnly       # host-side, no -Server',
+            "Resolve-DnsName $probeName -DnsOnly       # host-side, no -Server",
             $probeCommand
         )
     }
