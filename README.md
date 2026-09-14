@@ -34,10 +34,10 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 
 | Function | What it does |
 |---|---|
-| `Get-IcsDnsFailureDiagnostics` | On a dead ICS DNS proxy, probes `SharedAccess` service status + host upstream DNS and returns the single applicable fix (start service / fix host network / restart + reboot) as a string. Folded into `Test-IcsDnsProxyReachable`'s terminal FAIL `Detail`. |
+| `Get-IcsDnsFailureDiagnostics` | On a dead ICS DNS proxy, probes `SharedAccess` service status + host upstream DNS and returns the single applicable fix (start service / fix host network / restart + reboot) as a string, followed by the commands that carry it out, one per line, ending with the re-probe. Pass `-WanAdapterName` / `-LanAdapterName` to get a ready-to-paste `Reset-IcsSharing` line instead of placeholders. Folded into both of `Test-IcsDnsProxyReachable`'s FAIL `Detail`s. |
 | `Reset-IcsSharing` | Programmatic equivalent of toggling the WiFi adapter's Sharing tab off + on, via `HNetCfg.HNetShare` COM. Use when ICS's DNS proxy enters its known broken state (answers UDP/53 queries with TCP RSTs) where a `Restart-Service SharedAccess` does not recover. |
 | `Test-HostDnsReachable` | Upstream-side counterpart to `Test-IcsDnsReachable`: resolves via the host's OWN configured resolver (no `-Server`). Used to tell a wedged ICS proxy (host DNS works, proxy does not) from a dead host upstream (neither works). |
-| `Test-IcsDnsProxyReachable` | Layered probe + one-shot auto-repair: tests ICS DNS proxy reachability; on FAIL invokes `Reset-IcsSharing` once and re-probes. If still dead, enriches the finding `Detail` via `Get-IcsDnsFailureDiagnostics`. Returns a finding object `{Status; Label; Detail}` for callers to route into their own preflight surface. |
+| `Test-IcsDnsProxyReachable` | Layered probe + one-shot auto-repair: tests ICS DNS proxy reachability; on FAIL invokes `Reset-IcsSharing` once and re-probes. If still dead - or if repair was skipped (`-NoAutoRepair`, or no `-WanAdapterName`) - enriches the finding `Detail` via `Get-IcsDnsFailureDiagnostics`, so both FAIL paths carry the same verdict and commands. Returns a finding object `{Status; Label; Detail}` for callers to route into their own preflight surface. |
 | `Test-IcsDnsReachable` | Pure pass-through over `Resolve-DnsName` (via a specified `-Server`) so probes can be mocked. Returns `$true` if that resolver answered cleanly, `$false` for any error (timeout, RST, NXDOMAIN). |
 
 ### Portproxy

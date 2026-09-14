@@ -13,6 +13,10 @@ history and the tag list.
 
 ## [Unreleased]
 
+### Changed
+- `Get-IcsDnsFailureDiagnostics` now appends the commands that carry out its verdict, one per line, instead of describing them in prose. The wedged-proxy verdict said "re-toggle sharing", leaving the operator to rediscover that the toggle is `Reset-IcsSharing` and that it takes two interface names; it now ends with a runnable sequence (`Restart-Service` -> `Reset-IcsSharing` -> re-probe -> `Restart-Computer`). Every branch closes with the same `Resolve-DnsName` the check itself runs, so "did the fix take" no longer means re-running the whole preflight. New optional `-WanAdapterName` / `-LanAdapterName` shape the `Reset-IcsSharing` line into this host's actual invocation; without them it degrades to placeholders plus a `Get-NetAdapter` hint.
+- `Test-IcsDnsProxyReachable` routes its skipped-repair FAIL (`-NoAutoRepair`, or no `-WanAdapterName`) through `Get-IcsDnsFailureDiagnostics` too, and forwards the adapter names on both FAIL paths. That path used to hand out a hardcoded "toggle the Sharing checkbox" hint regardless of whether the service was even running - a choice the diagnostics function already makes correctly.
+
 ## [1.4.0] - 2026-07-29
 
 ### Added
