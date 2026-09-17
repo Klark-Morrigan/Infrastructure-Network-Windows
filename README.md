@@ -38,7 +38,11 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 | `Reset-IcsSharing` | Programmatic equivalent of toggling the WiFi adapter's Sharing tab off + on, via `HNetCfg.HNetShare` COM. Use when ICS's DNS proxy enters its known broken state (answers UDP/53 queries with TCP RSTs) where a `Restart-Service SharedAccess` does not recover. |
 | `Test-HostDnsReachable` | Upstream-side counterpart to `Test-IcsDnsReachable`: resolves via the host's OWN configured resolver (no `-Server`). Used to tell a wedged ICS proxy (host DNS works, proxy does not) from a dead host upstream (neither works). |
 | `Test-IcsDnsProxyReachable` | Layered probe + one-shot auto-repair: tests ICS DNS proxy reachability; on FAIL invokes `Reset-IcsSharing` once and re-probes. If still dead - or if repair was skipped (`-NoAutoRepair`, or no `-WanAdapterName`) - enriches the finding `Detail` via `Get-IcsDnsFailureDiagnostics`, so both FAIL paths carry the same verdict and commands. Returns a finding object `{Status; Label; Detail}` for callers to route into their own preflight surface. |
-| `Test-IcsDnsReachable` | Pure pass-through over `Resolve-DnsName` (via a specified `-Server`) so probes can be mocked. Returns `$true` if that resolver answered cleanly, `$false` for any error (timeout, RST, NXDOMAIN). |
+| `Test-IcsDnsReachable` | Asks whether a specified `-Server` answers. Returns `$true` if that resolver answered cleanly, `$false` for any error (timeout, RST, NXDOMAIN). |
+
+Both probes are wrappers over the private `Test-DnsProbeName`, which owns the resolve and the any-error-is-`$false` contract;
+the probe host comes from the private `Get-DnsProbeName`, so an operator-facing message can only print the name the probe actually used.
+The wrappers stay because the name at a call site is what says which of the two questions is being asked.
 
 ### Portproxy
 
@@ -98,6 +102,10 @@ Everything here is Windows-only — the underlying primitives (`netsh`,
 Infrastructure.Network.Windows/
   Infrastructure.Network.Windows.psd1
   Infrastructure.Network.Windows.psm1
+  Private/                      # Shared internals: dot-sourced, never exported
+    Dns/
+      Get-DnsProbeName.ps1
+      Test-DnsProbeName.ps1
   Public/
     Adapter/
       Get-WirelessNetAdapter.ps1
@@ -122,6 +130,7 @@ Infrastructure.Network.Windows/
       Test-WslRouterReachability.ps1
 Tests/
   Adapter/, Ics/, Portproxy/, Firewall/, Relay/, Profile/, Probes/   # mirror of Public/
+  Dns/                                                               # mirror of Private/
 .github/workflows/
   ci-yaml.yml                 # Delegates to Common-Automation reusable ci-yaml.yml
   ci-bash.yml                 # Delegates to Common-Automation reusable ci-bash.yml

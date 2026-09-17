@@ -57,10 +57,9 @@ function Get-IcsDnsFailureDiagnostics {
     # it in a multi-finding error, where later lines start at column 0.
     $commandIndent = '        '
 
-    # Must stay the name Test-IcsDnsReachable / Test-HostDnsReachable resolve -
-    # those own the probe; printing a different host would hand the operator a
-    # command that proves something other than what the check measured.
-    $probeName = 'archive.ubuntu.com'
+    # Read from the same source the probes resolve, so a printed command can
+    # never verify a different name than the check measured.
+    $probeName = Get-DnsProbeName
 
     # The verify step for every verdict: the same probe the check itself runs,
     # so "did the fix take" is answered without re-running the whole preflight.

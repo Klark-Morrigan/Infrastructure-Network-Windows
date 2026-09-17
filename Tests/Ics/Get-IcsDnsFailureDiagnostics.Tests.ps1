@@ -11,11 +11,19 @@ BeforeAll {
         param([string] $Name, $ErrorAction)
     }
     function Test-HostDnsReachable { }
+    function Get-DnsProbeName { }
 
     . "$PSScriptRoot\..\..\Infrastructure.Network.Windows\Public\Ics\Get-IcsDnsFailureDiagnostics.ps1"
 }
 
 Describe 'Get-IcsDnsFailureDiagnostics' {
+
+    BeforeEach {
+        # Deliberately NOT the real probe host: the printed commands must come
+        # from whatever Get-DnsProbeName owns, so a hardcoded name here would
+        # pass either way.
+        Mock Get-DnsProbeName { 'probe.example.test' }
+    }
 
     Context 'SharedAccess service is not Running' {
 
@@ -37,7 +45,7 @@ Describe 'Get-IcsDnsFailureDiagnostics' {
             $lines = (Get-IcsDnsFailureDiagnostics -DnsProbeTarget '192.168.137.1') -split "`n"
 
             $lines[-1].Trim() |
-                Should -Be 'Resolve-DnsName archive.ubuntu.com -Server 192.168.137.1 -DnsOnly'
+                Should -Be 'Resolve-DnsName probe.example.test -Server 192.168.137.1 -DnsOnly'
         }
 
         It 'reports ''not found'' when the service is absent' {

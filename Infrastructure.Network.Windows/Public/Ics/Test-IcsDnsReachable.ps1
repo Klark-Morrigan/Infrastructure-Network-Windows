@@ -5,30 +5,24 @@
 
 # ---------------------------------------------------------------------------
 # Test-IcsDnsReachable
-#   Pass-through predicate over Resolve-DnsName so tests can mock the
-#   probe (the real cmdlet hits the network and is not deterministic
-#   in CI). Any error - RST, timeout, NXDOMAIN, missing module -
-#   reduces to $false because the only thing the caller cares about
-#   is "the path answers cleanly". A proxy returning NXDOMAIN is
-#   just as broken as one timing out, since the request name is a
-#   stable real-world host we control the choice of (archive.ubuntu.com).
+#   Asks whether a SPECIFIC resolver answers - typically the ICS DNS proxy on
+#   the host-side vEthernet IP, the exact UDP/53 path a VM on that switch is
+#   about to use. $true only when that resolver answered cleanly; see
+#   Test-DnsProbeName for why every error reduces to $false.
+#
+#   Kept as a named wrapper rather than folding callers onto the private
+#   helper: the name is what makes a call site readable as the question being
+#   asked, and it is the mockable seam the preflight's tests pin.
 # ---------------------------------------------------------------------------
 
 function Test-IcsDnsReachable {
     [CmdletBinding()]
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [string] $Server
     )
 
-    try {
-        $result = Resolve-DnsName -Name 'archive.ubuntu.com' `
-                                  -Server $Server `
-                                  -DnsOnly `
-                                  -ErrorAction Stop
-        return [bool]$result
-    } catch {
-        return $false
-    }
+    Test-DnsProbeName -Server $Server
 }
