@@ -17,6 +17,9 @@ history and the tag list.
 - `Get-IcsDnsFailureDiagnostics` now appends the commands that carry out its verdict, one per line, instead of describing them in prose. The wedged-proxy verdict said "re-toggle sharing", leaving the operator to rediscover that the toggle is `Reset-IcsSharing` and that it takes two interface names; it now ends with a runnable sequence (`Restart-Service` -> `Reset-IcsSharing` -> re-probe -> `Restart-Computer`). Every branch closes with the same `Resolve-DnsName` the check itself runs, so "did the fix take" no longer means re-running the whole preflight. New optional `-WanAdapterName` / `-LanAdapterName` shape the `Reset-IcsSharing` line into this host's actual invocation; without them it degrades to placeholders plus a `Get-NetAdapter` hint.
 - `Test-IcsDnsProxyReachable` routes its skipped-repair FAIL (`-NoAutoRepair`, or no `-WanAdapterName`) through `Get-IcsDnsFailureDiagnostics` too, and forwards the adapter names on both FAIL paths. That path used to hand out a hardcoded "toggle the Sharing checkbox" hint regardless of whether the service was even running - a choice the diagnostics function already makes correctly.
 
+### Fixed
+- `Test-RouterSshRelay` reported a refused connect as a generic probe error instead of "No SSH relay listening ... re-lay it with `Set-RouterSshRelay`". A refusal faults the connect task, and `Task.Wait` rethrows that rather than returning false, so at the default 5s budget the commonest failure of all - nothing listening - landed in the catch-all and lost its advice. The fault now resolves to the same verdict as an expired budget, and the socket error is quoted in the reason so a refusal is distinguishable from a silently black-holed port. The suite missed it because every nothing-listening test used a 2s budget, short enough to expire at the same instant the refusal arrived; one now probes at the default.
+
 ## [1.4.0] - 2026-07-29
 
 ### Added

@@ -7,8 +7,7 @@
 # Test-RouterSshRelay
 #   Probes the controller -> router SSH relay end to end and reports which
 #   half of it is broken. The read counterpart to Set-RouterSshRelay /
-#   Remove-RouterSshRelay, which until now had no verifier: the relay could
-#   be laid and torn down, never checked.
+#   Remove-RouterSshRelay.
 #
 #   WHY AN ACTIVE PROBE, not an inspection of the netsh table. The failure
 #   this exists to catch is that an ICS toggle regenerates the Internal
@@ -47,23 +46,14 @@
 #   want a gate assert on .Ok and surface .Reason, which is written to be
 #   shown to an operator verbatim.
 #
-#   PREFER THE BASH SIBLING WHERE IT APPLIES. Common-Ansible ships
-#   ops/virtual-machines/_assert-router-reachable.sh, which probes this same
-#   hop with the same nc + ssh the Ansible ProxyCommand uses. Because it runs
-#   WSL-side rather than host-side it ALSO traverses the Windows Firewall,
-#   which this loopback probe cannot (see SCOPE above) - so it is the stronger
-#   check, and it already gates every Ansible flow via
-#   _run-playbook.sh -> resolve_router. A caller already executing in bash
-#   under WSL should use that and not this.
-#
-#   What this exists for is the host-side callers that run no playbook and so
-#   cannot reach it: an operator at a PowerShell prompt, a fleet-readiness
-#   script, a staging pre-check. Reimplementing either in terms of the other
-#   is not worth it - they sit on opposite sides of the WSL boundary.
-#
-#   That reference is documentation, NOT a dependency: this module does not
-#   consume Common-Ansible and must not start. It is here so a reader
-#   choosing between the two knows the bash one is preferable when reachable.
+#   PREFER A WSL-SIDE PROBE WHERE ONE IS REACHABLE. A probe run from inside
+#   WSL also traverses the Windows Firewall, which this loopback probe cannot
+#   (see SCOPE), making it the stronger check - Common-Ansible's
+#   ops/virtual-machines/_assert-router-reachable.sh is that probe, and it
+#   already gates the Ansible flows. This exists for host-side callers that
+#   cannot reach it: an operator at a PowerShell prompt, a readiness script, a
+#   pre-check. The reference is documentation, not a dependency - this module
+#   does not consume Common-Ansible and must not start.
 # ---------------------------------------------------------------------------
 
 function Test-RouterSshRelay {
@@ -114,10 +104,39 @@ function Test-RouterSshRelay {
         # overload ignores any timeout and can hang on SYN retries for the
         # OS default (~20s+), which is far too long for a gate.
         $connectTask = $client.ConnectAsync($ListenAddress, $ListenPort)
-        if (-not $connectTask.Wait($timeoutMs) -or -not $client.Connected) {
+
+        # Wait reports the two ways a connect can fail differently: an expired
+        # budget returns false, while a refusal FAULTS the task and is rethrown.
+        # Both mean nothing usable answered, so both take the verdict below -
+        # letting the fault escape would hand the generic catch the commonest
+        # failure of all and replace this advice with a .NET exception string.
+        $connectFault = ''
+        try {
+            $connected = $connectTask.Wait($timeoutMs) -and $client.Connected
+        } catch {
+            $connected = $false
+
+            # Unwrap to the socket error: Wait raises AggregateException and
+            # PowerShell wraps that again, so the outer messages say only that
+            # something went wrong, not what.
+            $inner = $_.Exception
+            while ($inner.InnerException) { $inner = $inner.InnerException }
+            $connectFault = $inner.Message
+        }
+
+        if (-not $connected) {
+            # The cause separates "refused at once" (no listener on the port)
+            # from "no answer at all" (a black-holed port, or a host that never
+            # replied) - same remedy, different thing to check first, so it is
+            # reported rather than flattened into one sentence.
+            $cause = if ($connectFault) {
+                "The connect failed: $connectFault"
+            } else {
+                "The connect did not complete within ${TimeoutSeconds}s."
+            }
             $result.Reason = (
-                "No SSH relay listening on $endpoint. The host-side portproxy " +
-                "is absent or on a different port. Re-lay it with " +
+                "No SSH relay listening on $endpoint. $cause The host-side " +
+                "portproxy is absent or on a different port. Re-lay it with " +
                 "Set-RouterSshRelay -ConnectAddress <router-ip>, or run the " +
                 "provisioner's network preflight with -AutoRepair."
             )
