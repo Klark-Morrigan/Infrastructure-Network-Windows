@@ -7,9 +7,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org).
 
 Add entries under `[Unreleased]` as changes merge; at release the
-`[Unreleased]` heading is promoted to the new version + date and a fresh
-`[Unreleased]` is opened above it. Changes prior to 0.4.0 live in the git
-history and the tag list.
+`[Unreleased]` heading is promoted to the new version + date, a fresh
+`[Unreleased]` is opened above it, and the new version gets a line in the
+index below. Changes prior to 0.4.0 live in the git history and the tag list.
 
 ## Contents
 
