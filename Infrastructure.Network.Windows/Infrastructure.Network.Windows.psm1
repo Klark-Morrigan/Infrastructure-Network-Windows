@@ -20,10 +20,18 @@
     Each function lives in its own file under Public\<subdomain>\ and
     is dot-sourced below so diffs stay focused on a single function
     per commit.
+
+    Private\<subdomain>\ holds helpers shared by several exported
+    functions. They are dot-sourced the same way but never exported:
+    keeping them off the public surface means a shared implementation
+    can change without being a contract change for consumers.
 #>
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+. "$PSScriptRoot\Private\Dns\Get-DnsProbeName.ps1"
+. "$PSScriptRoot\Private\Dns\Test-DnsProbeName.ps1"
 
 . "$PSScriptRoot\Public\Adapter\Get-WirelessNetAdapter.ps1"
 . "$PSScriptRoot\Public\Ics\Get-IcsDnsFailureDiagnostics.ps1"

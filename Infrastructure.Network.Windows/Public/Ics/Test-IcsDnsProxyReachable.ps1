@@ -62,10 +62,17 @@ function Test-IcsDnsProxyReachable {
         } else {
             "WanAdapterName not supplied so auto-repair is skipped."
         }
+        # Same diagnostics as the terminal FAIL below: the repair was skipped,
+        # not attempted-and-failed, so the operator still needs the verdict and
+        # its commands - and getting them from one place keeps the two FAIL
+        # paths from drifting into differently-worded advice.
+        $diag = Get-IcsDnsFailureDiagnostics -DnsProbeTarget $DnsProbeTarget `
+                                             -WanAdapterName $WanAdapterName `
+                                             -LanAdapterName $LanAdapterName
         return [PSCustomObject]@{
             Status = 'FAIL'
             Label  = "ICS DNS proxy answers at $DnsProbeTarget"
-            Detail = "Resolve-DnsName archive.ubuntu.com -Server $DnsProbeTarget failed. $hint Toggle ICS sharing manually (WiFi adapter -> Sharing tab -> uncheck -> re-check) and re-run."
+            Detail = "Probe failed. $hint $diag"
         }
     }
 
@@ -76,7 +83,11 @@ function Test-IcsDnsProxyReachable {
         return [PSCustomObject]@{
             Status = 'FAIL'
             Label  = "ICS DNS proxy answers at $DnsProbeTarget"
-            Detail = "Resolve-DnsName failed; Reset-IcsSharing also failed: $($_.Exception.Message)"
+            # No command list here: the repair itself is what broke, and its
+            # own throw carries the cause. The one thing the operator always
+            # needs is the adapter-name check that COM lookups fail on.
+            Detail = "Resolve-DnsName failed; Reset-IcsSharing also failed: " +
+                     "$($_.Exception.Message) Confirm the WAN/LAN names with Get-NetAdapter."
         }
     }
 
@@ -92,7 +103,11 @@ function Test-IcsDnsProxyReachable {
     # operator a "check X and Y" checklist, probe the two distinguishing
     # signals (SharedAccess status + host-side upstream DNS) and report
     # the single fix that applies. See Get-IcsDnsFailureDiagnostics.
-    $diag = Get-IcsDnsFailureDiagnostics -DnsProbeTarget $DnsProbeTarget
+    # Adapter names are forwarded so the verdict's Reset-IcsSharing example is
+    # the real invocation for this host rather than a placeholder.
+    $diag = Get-IcsDnsFailureDiagnostics -DnsProbeTarget $DnsProbeTarget `
+                                         -WanAdapterName $WanAdapterName `
+                                         -LanAdapterName $LanAdapterName
     return [PSCustomObject]@{
         Status = 'FAIL'
         Label  = "ICS DNS proxy answers at $DnsProbeTarget"

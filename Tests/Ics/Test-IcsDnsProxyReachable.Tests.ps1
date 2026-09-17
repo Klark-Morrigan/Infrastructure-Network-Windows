@@ -3,7 +3,9 @@ BeforeAll {
     function Reset-IcsSharing     { param([string] $WanInterfaceName, [string] $LanInterfaceName) }
     # Stubbed so the terminal-FAIL path is tested in isolation from the
     # diagnostics internals (those have their own dedicated suite).
-    function Get-IcsDnsFailureDiagnostics { param([string] $DnsProbeTarget) }
+    function Get-IcsDnsFailureDiagnostics {
+        param([string] $DnsProbeTarget, [string] $WanAdapterName, [string] $LanAdapterName)
+    }
 
     . "$PSScriptRoot\..\..\Infrastructure.Network.Windows\Public\Ics\Test-IcsDnsProxyReachable.ps1"
 }
@@ -76,7 +78,11 @@ Describe 'Test-IcsDnsProxyReachable' {
 
             $result.Detail | Should -Match 'DIAGNOSTIC-VERDICT'
             Should -Invoke Get-IcsDnsFailureDiagnostics -Times 1 -Exactly `
-                -ParameterFilter { $DnsProbeTarget -eq '192.168.137.1' }
+                -ParameterFilter {
+                    $DnsProbeTarget -eq '192.168.137.1'      -and
+                    $WanAdapterName -eq 'Wi-Fi'              -and
+                    $LanAdapterName -eq 'vEthernet (Shared)'
+                }
         }
 
         It 'reports FAIL when Reset-IcsSharing itself throws' {
@@ -98,6 +104,7 @@ Describe 'Test-IcsDnsProxyReachable' {
         It 'reports FAIL without invoking Reset-IcsSharing when -NoAutoRepair is set' {
             Mock Test-IcsDnsReachable { $false }
             Mock Reset-IcsSharing { }
+            Mock Get-IcsDnsFailureDiagnostics { 'DIAGNOSTIC-VERDICT' }
 
             $result = Test-IcsDnsProxyReachable `
                 -DnsProbeTarget  '192.168.137.1' `
@@ -109,9 +116,27 @@ Describe 'Test-IcsDnsProxyReachable' {
             Should -Invoke Reset-IcsSharing -Times 0
         }
 
+        It 'folds the same diagnostics into the skipped-repair FAIL detail' {
+            Mock Test-IcsDnsReachable { $false }
+            Mock Reset-IcsSharing { }
+            Mock Get-IcsDnsFailureDiagnostics { 'DIAGNOSTIC-VERDICT' }
+
+            $result = Test-IcsDnsProxyReachable `
+                -DnsProbeTarget  '192.168.137.1' `
+                -LanAdapterName  'vEthernet (Shared)' `
+                -WanAdapterName  'Wi-Fi' `
+                -NoAutoRepair
+
+            $result.Detail | Should -Match 'NoAutoRepair'
+            $result.Detail | Should -Match 'DIAGNOSTIC-VERDICT'
+            Should -Invoke Get-IcsDnsFailureDiagnostics -Times 1 -Exactly `
+                -ParameterFilter { $WanAdapterName -eq 'Wi-Fi' }
+        }
+
         It 'reports FAIL without auto-repair when WanAdapterName is unset' {
             Mock Test-IcsDnsReachable { $false }
             Mock Reset-IcsSharing { }
+            Mock Get-IcsDnsFailureDiagnostics { 'DIAGNOSTIC-VERDICT' }
 
             $result = Test-IcsDnsProxyReachable `
                 -DnsProbeTarget  '192.168.137.1' `
