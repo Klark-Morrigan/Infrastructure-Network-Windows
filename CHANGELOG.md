@@ -14,17 +14,20 @@ history and the tag list.
 ## [Unreleased]
 
 ### Changed
+
 - `Get-IcsDnsFailureDiagnostics` now appends the commands that carry out its verdict, one per line, instead of describing them in prose. The wedged-proxy verdict said "re-toggle sharing", leaving the operator to rediscover that the toggle is `Reset-IcsSharing` and that it takes two interface names; it now ends with a runnable sequence (`Restart-Service` -> `Reset-IcsSharing` -> re-probe -> `Restart-Computer`). Every branch closes with the same `Resolve-DnsName` the check itself runs, so "did the fix take" no longer means re-running the whole preflight. New optional `-WanAdapterName` / `-LanAdapterName` shape the `Reset-IcsSharing` line into this host's actual invocation; without them it degrades to placeholders plus a `Get-NetAdapter` hint.
 - `Test-IcsDnsProxyReachable` routes its skipped-repair FAIL (`-NoAutoRepair`, or no `-WanAdapterName`) through `Get-IcsDnsFailureDiagnostics` too, and forwards the adapter names on both FAIL paths. That path used to hand out a hardcoded "toggle the Sharing checkbox" hint regardless of whether the service was even running - a choice the diagnostics function already makes correctly.
 
 - The two DNS probes (`Test-IcsDnsReachable`, `Test-HostDnsReachable`) were the same function written twice, differing only in whether `-Server` was passed. Both now delegate to a private `Test-DnsProbeName`, and the probe host they resolve - which operator messages print as a command to run - comes from a private `Get-DnsProbeName` rather than a literal repeated across four places. Public signatures and behaviour are unchanged. Adds a `Private/` tree to the module for internals that several exported functions share.
 
 ### Fixed
+
 - `Test-RouterSshRelay` reported a refused connect as a generic probe error instead of "No SSH relay listening ... re-lay it with `Set-RouterSshRelay`". A refusal faults the connect task, and `Task.Wait` rethrows that rather than returning false, so at the default 5s budget the commonest failure of all - nothing listening - landed in the catch-all and lost its advice. The fault now resolves to the same verdict as an expired budget, and the socket error is quoted in the reason so a refusal is distinguishable from a silently black-holed port. The suite missed it because every nothing-listening test used a 2s budget, short enough to expire at the same instant the refusal arrived; one now probes at the default.
 
 ## [1.4.0] - 2026-07-29
 
 ### Added
+
 - `Test-RouterSshRelay` - the read counterpart `Set-RouterSshRelay` /
   `Remove-RouterSshRelay` shipped without: until now the relay could be
   laid and torn down but never verified, so a broken one was only ever
@@ -62,6 +65,7 @@ history and the tag list.
 ## [1.3.0] - 2026-06-25
 
 ### Added
+
 - `Get-WirelessNetAdapter` - single source of truth for "which physical
   adapters are Wi-Fi" on a Windows host (matches on the driver
   `InterfaceDescription`, not the host-varying connection name). Returns
@@ -79,6 +83,7 @@ history and the tag list.
 ## [1.2.0] - 2026-06-22
 
 ### Added
+
 - `Remove-RouterSshPortProxy` - teardown counterpart to
   `Set-RouterSshPortProxy`. Removes every netsh portproxy rule forwarding
   to a given router IP (keyed on the connect target, so it sweeps relays
@@ -94,6 +99,7 @@ history and the tag list.
 ## [1.1.0] - 2026-06-18
 
 ### Added
+
 - `Get-IcsDnsFailureDiagnostics` - on a dead ICS DNS proxy, probes the
   two distinguishing host signals (`SharedAccess` service status + an
   upstream-side resolve via the host's own resolver) and returns the one
@@ -105,6 +111,7 @@ history and the tag list.
   need different fixes.
 
 ### Changed
+
 - `Test-IcsDnsProxyReachable`'s terminal FAIL (proxy still unreachable
   after the one-shot `Reset-IcsSharing`) now folds
   `Get-IcsDnsFailureDiagnostics` output into the finding `Detail`, naming
@@ -115,11 +122,13 @@ history and the tag list.
 ## [1.0.0] - 2026-06-17
 
 ### Changed
+
 - Major version bump; no functional changes (version realignment).
 
 ## [0.6.0] - 2026-06-16
 
 ### Changed
+
 - `Set-RouterSshPortProxyFirewall` scopes its inbound 2222 allow by
   source range (`-RemoteAddress`, default `172.16.0.0/12` - the range
   WSL2's NAT allocates from) instead of by `-InterfaceAlias`. An
@@ -134,10 +143,12 @@ history and the tag list.
   interface-pinned rule.
 
 ### Added
+
 - `Set-RouterSshPortProxyFirewall -WslNatRange` to narrow the allowed
   source range on hosts that also live on a 172.16/12 network.
 
 ### Removed
+
 - The 0.5.0 Hyper-V Firewall rule (`New-NetFirewallHyperVRule`).
   WSL-to-host traffic is outbound from the WSL VM
   (`DefaultOutboundAction = Allow`), so the Hyper-V Firewall never gated
@@ -148,6 +159,7 @@ history and the tag list.
 ## [0.5.0] - 2026-06-16
 
 ### Changed
+
 - `Set-RouterSshPortProxyFirewall` now also adds a Hyper-V Firewall
   allow (`New-NetFirewallHyperVRule`) scoped to WSL's VM-creator id, not
   just the Defender rule. On Windows 11 WSL "Hyper-V firewall" mode,
@@ -160,6 +172,7 @@ history and the tag list.
 ## [0.4.1] - 2026-06-16
 
 ### Changed
+
 - `Set-RouterSshPortProxy` now retries the `netsh portproxy add` via
   Common.PowerShell's `Invoke-WithExitCodeRetry`. The delete-then-add
   refresh runs unconditionally, so a transient add failure previously
@@ -167,17 +180,20 @@ history and the tag list.
   absorbs the transient case and still throws on a genuine failure.
 
 ### Dependencies
+
 - Added a `RequiredModules` dependency on `Common.PowerShell` (>= 8.1.0),
   which provides `Invoke-WithExitCodeRetry`.
 
 ## [0.4.0] - 2026-06-16
 
 ### Added
+
 - Baseline changelog. This section pins the current released surface so the
   release pipeline's changelog gate and GitHub Release have notes to anchor
   on; earlier history remains in the git log and tag list.
 
 ### Notes
+
 - Public surface: Windows host network primitives - ICS toggling
   (`Reset-IcsSharing`, `Test-IcsDnsReachable`, `Test-IcsDnsProxyReachable`),
   netsh portproxy + firewall for router SSH (`Get-NetshPortProxyRules`,
